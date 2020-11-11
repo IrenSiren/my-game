@@ -24,7 +24,7 @@ n=10
 size = 40
 
 #density
-p = 0.5       
+p = 2       
 
 # Score
 score = 0
@@ -59,10 +59,11 @@ for u in range (n):
   ball = { 'r' : r,
            'x': randint(r+10, screen_width - r),
            'y' : randint(r+10, screen_hight - r),
-           'v_x' : randrange(7, 17),
-           'v_y' : randrange(7, 17),
+           'v_x' : randrange(1, 2),
+           'v_y' : randrange(1, 2) ,
            'color' : COLORS[randint(0, 5)],
-           'm' : m }
+           'm' : m ,
+           'special':randrange(0, 2) }
   ball_list.append(ball)
 
 
@@ -138,46 +139,59 @@ def collision(i, list):
 
 def draw_balls():
   for i in range (len(ball_list)):
+    if ball_list[i]['special'] == 1:
+      ball_list[i]['v_x'] += 2
+      ball_list[i]['v_y'] += 2
     # make ball bounce
     bounce (i)
     #make collisions
     collision(i, len(ball_list))
-    
+    if ball_list[i]['special'] == 0:
+      pygame.draw.circle(screen, ball_list[i]['color'], [ball_list[i]['x'], ball_list[i]['y']], ball_list[i]['r'])
+      ball_list[i]['x'] += ball_list[i]['v_x']
+      ball_list[i]['y'] += ball_list[i]['v_y'] 
+    else:
+      pygame.draw.circle(screen, ball_list[i]['color'], [ball_list[i]['x'], ball_list[i]['y']], ball_list[i]['r'])
+      pygame.draw.circle(screen, RED , [ball_list[i]['x'], ball_list[i]['y']], ball_list[i]['r']//2)
+      ball_list[i]['x'] += ball_list[i]['v_x']
+      ball_list[i]['y'] += ball_list[i]['v_y']
 
-    pygame.draw.circle(screen, ball_list[i]['color'], [ball_list[i]['x'], ball_list[i]['y']], ball_list[i]['r'])
-    ball_list[i]['x'] += ball_list[i]['v_x']
-    ball_list[i]['y'] += ball_list[i]['v_y'] 
-    
+
+
 
 
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
 while not finished:
-    clock.tick(FPS)
+  clock.tick(FPS)
 
-    screen.fill((0, 0, 0))
-    # Background Image
-    screen.blit(background, (0, 0))
+  screen.fill((0, 0, 0))
+  # Background Image
+  screen.blit(background, (0, 0))
 
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        finished = True
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        print('Click!') 
-        pos = pygame.mouse.get_pos()   
-        x_m = pos[0]
-        y_m = pos[1]
-        print(pos)
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      finished = True
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      print('Click!') 
+      pos = pygame.mouse.get_pos()   
+      x_m = pos[0]
+      y_m = pos[1]
+      print(pos)
 
-        for i in range(len(ball_list)):
-          r = ball_list[i]['r']
-          x = ball_list[i]['x']
-          y = ball_list[i]['y']
-          distance = int (hypot(x - x_m , y - y_m))
-          if distance <= r :
+      for i in range(len(ball_list)):
+        r = ball_list[i]['r']
+        x = ball_list[i]['x']
+        y = ball_list[i]['y'] 
+        distance = sqrt((x - x_m)**2 + (y - y_m)**2)
+        #distance = int (hypot(x - x_m, y - y_m))
+        if distance <= r  :
+          if ball_list[i]['special'] == 1:
+            score += 5
+          else: 
             score += 1
-            print(score)
+        
             
 
     scoretext = myfont.render("Score {0}".format(score), 1, (0,0,255))
